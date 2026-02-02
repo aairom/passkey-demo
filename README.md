@@ -49,6 +49,7 @@ For detailed architecture diagrams, see [ARCHITECTURE.md](ARCHITECTURE.md).
 ## Prerequisites
 
 - Go 1.21 or higher
+   ```
    go run .
    ```
 
