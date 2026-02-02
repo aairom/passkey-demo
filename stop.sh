@@ -31,19 +31,37 @@ print_warning() {
 
 # Check if PID file exists
 if [ ! -f "$PID_FILE" ]; then
-    print_error "Application is not running (PID file not found)"
-    exit 1
-fi
-
-# Read PID
-PID=$(cat "$PID_FILE")
-
-# Check if process is running
-if ! ps -p "$PID" > /dev/null 2>&1; then
-    print_warning "Process with PID $PID is not running"
-    print_info "Cleaning up PID file..."
-    rm -f "$PID_FILE"
-    exit 0
+    # Try to find the process by name and port
+    print_warning "PID file not found. Checking for running process..."
+    
+    # Find process listening on port 8080
+    PID=$(lsof -ti :8080 2>/dev/null | head -n 1)
+    
+    if [ -z "$PID" ]; then
+        print_error "Application is not running"
+        exit 1
+    fi
+    
+    print_info "Found process with PID $PID listening on port 8080"
+else
+    # Read PID from file
+    PID=$(cat "$PID_FILE")
+    
+    # Check if process is running
+    if ! ps -p "$PID" > /dev/null 2>&1; then
+        print_warning "Process with PID $PID is not running"
+        print_info "Cleaning up PID file..."
+        rm -f "$PID_FILE"
+        
+        # Check if another process is using the port
+        PORT_PID=$(lsof -ti :8080 2>/dev/null | head -n 1)
+        if [ -n "$PORT_PID" ]; then
+            print_warning "Found different process (PID $PORT_PID) using port 8080"
+            PID=$PORT_PID
+        else
+            exit 0
+        fi
+    fi
 fi
 
 print_info "Stopping $APP_NAME (PID: $PID)..."
