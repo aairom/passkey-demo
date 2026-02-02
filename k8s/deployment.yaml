@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: passkey-demo
+  namespace: passkey-demo
+  labels:
+    app: passkey-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: passkey-demo
+  template:
+    metadata:
+      labels:
+        app: passkey-demo
+    spec:
+      containers:
+      - name: passkey-demo
+        image: passkey-demo:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: RP_ID
+          valueFrom:
+            configMapKeyRef:
+              name: passkey-demo-config
+              key: RP_ID
+        - name: RP_ORIGIN
+          valueFrom:
+            configMapKeyRef:
+              name: passkey-demo-config
+              key: RP_ORIGIN
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: passkey-demo-config
+              key: PORT
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+
+# Made with Bob

@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+server/passkey-demo
+server/server
+*.exe
+*.test
+*.out
+
+# Logs
+*.log
+
+# Temporary files
+/tmp
+*.tmp
+
+# Scripts (not needed in container)
+start.sh
+stop.sh
+
+# Kubernetes manifests
+k8s/
+kubernetes/
